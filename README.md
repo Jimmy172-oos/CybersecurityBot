@@ -16,3 +16,7 @@ A console-based chatbot built in C# that educates South African citizens about c
 - Input validation
 - Typing effect for a conversational feel
 
+## CI Workflow 
+https://github.com/Jimmy172-oos/CybersecurityBot/actions/workflows/dotnet.yml/badge.svg
+
+<img width="1358" height="508" alt="CI workflow" src="https://github.com/user-attachments/assets/fe00df7e-a2a9-4483-b0d6-a371ea909cca" />
