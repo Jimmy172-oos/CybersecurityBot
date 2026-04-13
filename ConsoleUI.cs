@@ -43,7 +43,7 @@ namespace CybersecurityBot
           
         public static string GetUserInput(string userName)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
             Console.Write($"[{userName}]: ");
             Console.ResetColor();
             return Console.ReadLine();

@@ -33,7 +33,7 @@ namespace CybersecurityBot
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine("[INFO] Voice greeting file not found. Skipping audio.");
                     Console.ResetColor();
                 }
@@ -76,6 +76,13 @@ namespace CybersecurityBot
                 string botResponse = response.GetResponse(userInput);
 
                 ConsoleUI.PrintDivider();
+
+                // Show thinking effect before responding
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("[BOT is thinking]");
+                System.Threading.Thread.Sleep(1500); // waits 1.5 seconds
+                Console.Write("\r                          \r"); // clears the thinking line
+                Console.ResetColor();
 
                 if (botResponse == "EXIT")
                 {
