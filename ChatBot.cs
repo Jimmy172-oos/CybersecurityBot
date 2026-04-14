@@ -15,6 +15,7 @@ namespace CybersecurityBot
         }
 
         public void PlayVoiceGreeting()
+      
         {
             try
             {
@@ -28,8 +29,10 @@ namespace CybersecurityBot
                     psi.UseShellExecute = false;
                     psi.CreateNoWindow = true; // hides any popup window
 
+                    System.Threading.Thread.Sleep(500); // small delay before playing
                     Process audioProcess = Process.Start(psi);
-                    audioProcess.WaitForExit(); // waits for audio to finish before continuing
+                    audioProcess.WaitForExit();
+                    System.Threading.Thread.Sleep(500); // small delay after playing
                 }
                 else
                 {
