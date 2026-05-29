@@ -30,7 +30,6 @@ namespace CybersecurityBot
             {
                 return "Always look for HTTPS in the URL before entering personal information. Avoid clicking pop-ups and never download software from unknown websites.";
             }
-           
             else if (input.ToLower().Contains("malware"))
             {
                 return "Malware is malicious software designed to damage your device. Keep your antivirus updated and never open attachments from unknown senders.";
