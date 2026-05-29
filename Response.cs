@@ -34,6 +34,14 @@ namespace CybersecurityBot
             {
                 return "Malware is malicious software designed to damage your device. Keep your antivirus updated and never open attachments from unknown senders.";
             }
+            else if (input.ToLower().Contains("malware"))
+            {
+                return "Malware is malicious software designed to damage your device. Keep your antivirus updated and never open attachments from unknown senders.";
+            }
+            else if (input.ToLower().Contains("social engineering"))
+            {
+                return "Social engineering tricks people into giving away sensitive information. Be cautious of anyone urgently asking for personal details — even if they seem official.";
+            }
             else if (input.ToLower().Contains("hello") || input.ToLower().Contains("hi"))
             {
                 return "Hello! Great to chat with you. Ask me anything about cybersecurity!";

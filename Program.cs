@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace CybersecurityBot
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            ConsoleUI.DisplayASCIILogo();
-            ChatBot bot = new ChatBot();
-            bot.PlayVoiceGreeting();
-            bot.Start();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
         }
     }
 }
