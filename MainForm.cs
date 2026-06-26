@@ -25,7 +25,13 @@ namespace CybersecurityBot
         private SentimentDetector sentimentDetector = new SentimentDetector();
         private RandomResponses randomResponses = new RandomResponses();
         private string userName = "";
-        private string lastTopic = ""; // memory - remembers last topic discussed
+        private string lastTopic = "";
+
+        // NEW: Database, Activity Log, NLP, and Quiz
+        private DatabaseHelper db = new DatabaseHelper();
+        private ActivityLog activityLog = new ActivityLog();
+        private NLPHandler nlp = new NLPHandler();
+        private QuizForm quizForm = null;
 
         public MainForm()
         {
@@ -194,6 +200,7 @@ namespace CybersecurityBot
             AppendBotMessage($"Hello, {userName}! Welcome to the Cybersecurity Awareness Bot.");
             AppendBotMessage("You can ask me about phishing, passwords, malware, scams, privacy, and more.");
             AppendBotMessage("Type 'exit' or 'bye' to leave.");
+            AppendBotMessage("Type 'help' to see all the things I can do!");
         }
 
         private void UserInputBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -213,7 +220,7 @@ namespace CybersecurityBot
             // Validate empty input
             if (string.IsNullOrWhiteSpace(userInput))
             {
-                AppendBotMessage("It looks like you didn't type anything. Please ask me a cybersecurity question!");
+                AppendBotMessage("Please type something. I'm here to help you with cybersecurity!");
                 return;
             }
 
@@ -229,25 +236,220 @@ namespace CybersecurityBot
                 return;
             }
 
-            // Check for follow up questions
-            if (userInput.ToLower().Contains("tell me more") || userInput.ToLower().Contains("explain more") || userInput.ToLower().Contains("another tip"))
+            // ============================================================
+            // USE NLP TO DETECT INTENT
+            // ============================================================
+            string intent = nlp.DetectIntent(userInput);
+
+            // Handle based on intent
+            switch (intent)
             {
-                HandleFollowUp();
-                return;
+                case "help":
+                    string helpMessage = @"🤖 I can help you with:
+
+1️⃣ TASK MANAGEMENT (SQLite Database):
+   • 'Add task - Review privacy settings'
+   • 'Remind me to update password in 3 days'
+   • 'Show my tasks' or 'List tasks'
+   • 'Complete task 2' (use the task ID)
+   • 'Delete task 1'
+
+2️⃣ CYBERSECURITY QUIZ:
+   • 'Start quiz' or 'Play game' (11 questions!)
+
+3️⃣ ACTIVITY LOG:
+   • 'Show activity log'
+   • 'What have you done?'
+
+4️⃣ CYBERSECURITY TIPS:
+   • Ask about: phishing, passwords, scams, privacy, malware, safe browsing
+
+5️⃣ SENTIMENT DETECTION:
+   • I can detect if you're worried, frustrated, curious, or confused
+
+🔐 Stay safe online!";
+                    AppendBotMessage(helpMessage);
+                    return;
+
+                case "start_quiz":
+                    activityLog.AddEntry("Quiz started by user");
+                    quizForm = new QuizForm(activityLog);
+                    quizForm.ShowDialog();
+                    AppendBotMessage("🎮 Quiz completed! Check your score!");
+                    return;
+
+                case "show_log":
+                    string log = activityLog.GetFormattedLog();
+                    activityLog.AddEntry("Viewed activity log");
+                    AppendBotMessage("📋 Here's your activity log:\n" + log);
+                    return;
+
+                case "add_task":
+                case "view_tasks":
+                case "complete_task":
+                case "delete_task":
+                    string taskResponse = HandleTaskCommand(userInput);
+                    if (taskResponse != null)
+                    {
+                        AppendBotMessage(taskResponse);
+                        return;
+                    }
+                    break;
+
+                case "chat":
+                default:
+                    // Check for follow up questions
+                    if (userInput.ToLower().Contains("tell me more") || userInput.ToLower().Contains("explain more") ||
+                        userInput.ToLower().Contains("another tip"))
+                    {
+                        HandleFollowUp();
+                        return;
+                    }
+
+                    // Detect sentiment
+                    string sentiment = sentimentDetector.DetectSentiment(userInput);
+                    if (sentiment != "neutral")
+                    {
+                        AppendBotMessage(sentimentDetector.GetSentimentResponse(sentiment));
+                        return;
+                    }
+
+                    // Get regular keyword response
+                    string botResponse = GetKeywordResponse(userInput);
+                    AppendBotMessage(botResponse);
+                    break;
+            }
+        }
+
+        private string HandleTaskCommand(string input)
+        {
+            string lowered = input.ToLower();
+
+            // Add a task
+            if (lowered.Contains("add task") || lowered.Contains("new task") ||
+                lowered.Contains("create task") || lowered.Contains("i need to") ||
+                lowered.Contains("don't forget") || lowered.Contains("remind me") ||
+                lowered.Contains("set reminder"))
+            {
+                // Try to extract task details
+                string taskTitle = "";
+                string description = "";
+                DateTime? reminderDate = null;
+
+                // Remove command words to get the task
+                string[] removeWords = { "add task", "new task", "create task", "i need to",
+                                         "don't forget", "remind me", "set reminder", "to" };
+                string remaining = input;
+                foreach (string word in removeWords)
+                {
+                    if (remaining.ToLower().Contains(word))
+                    {
+                        int idx = remaining.ToLower().IndexOf(word);
+                        remaining = remaining.Substring(idx + word.Length).Trim();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(remaining))
+                {
+                    // Check for "in X days" or "tomorrow"
+                    if (remaining.ToLower().Contains("tomorrow"))
+                    {
+                        reminderDate = DateTime.Now.AddDays(1);
+                        remaining = remaining.Replace("tomorrow", "").Trim();
+                    }
+                    else if (remaining.ToLower().Contains("in "))
+                    {
+                        // Try to parse "in 3 days"
+                        string[] parts = remaining.Split(' ');
+                        for (int i = 0; i < parts.Length; i++)
+                        {
+                            if (parts[i].ToLower() == "in" && i + 2 < parts.Length)
+                            {
+                                if (int.TryParse(parts[i + 1], out int days))
+                                {
+                                    if (parts[i + 2].ToLower().Contains("day") || parts[i + 2].ToLower().Contains("week"))
+                                    {
+                                        reminderDate = DateTime.Now.AddDays(days);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    taskTitle = remaining.Length > 50 ? remaining.Substring(0, 50) : remaining;
+                    description = remaining;
+                }
+
+                if (!string.IsNullOrEmpty(taskTitle))
+                {
+                    db.AddTask(taskTitle, description, reminderDate);
+                    activityLog.AddEntry($"Task added: '{taskTitle}'");
+                    string reminderMsg = reminderDate.HasValue ? $" with reminder for {reminderDate.Value.ToShortDateString()}" : "";
+                    return $"✅ Task added: '{taskTitle}'{reminderMsg}";
+                }
+
+                return "Please tell me what task you'd like to add. Example: 'Add task - Review privacy settings'";
             }
 
-            // Detect sentiment first
-            string sentiment = sentimentDetector.DetectSentiment(userInput);
-            if (sentiment != "neutral")
+            // View tasks
+            else if (lowered.Contains("show task") || lowered.Contains("my tasks") ||
+                     lowered.Contains("view tasks") || lowered.Contains("list tasks") ||
+                     lowered.Contains("what tasks") || lowered.Contains("pending tasks"))
             {
-                AppendBotMessage(sentimentDetector.GetSentimentResponse(sentiment));
-                AppendBotMessage("What cybersecurity topic can I help you with today?");
-                return; // stops here, won't show the "didn't understand" message
+                bool showAll = lowered.Contains("all") || lowered.Contains("completed");
+                string tasks = db.GetTasksAsString(!showAll);
+                activityLog.AddEntry("Viewed tasks");
+                return tasks;
             }
 
-            // Get response based on keywords
-            string botResponse = GetKeywordResponse(userInput);
-            AppendBotMessage(botResponse);
+            // Mark as completed
+            else if (lowered.Contains("complete") && lowered.Contains("task"))
+            {
+                int taskId = 0;
+                string[] words = lowered.Split(' ');
+                foreach (string word in words)
+                {
+                    if (int.TryParse(word, out taskId))
+                        break;
+                }
+
+                if (taskId > 0)
+                {
+                    db.MarkTaskCompleted(taskId);
+                    activityLog.AddEntry($"Task {taskId} marked as completed");
+                    return $"✅ Task {taskId} marked as completed!";
+                }
+                else
+                {
+                    return "Please specify the task ID. Example: 'Complete task 2'";
+                }
+            }
+
+            // Delete task
+            else if (lowered.Contains("delete task") || lowered.Contains("remove task"))
+            {
+                int taskId = 0;
+                string[] words = lowered.Split(' ');
+                foreach (string word in words)
+                {
+                    if (int.TryParse(word, out taskId))
+                        break;
+                }
+
+                if (taskId > 0)
+                {
+                    db.DeleteTask(taskId);
+                    activityLog.AddEntry($"Task {taskId} deleted");
+                    return $"🗑️ Task {taskId} has been deleted.";
+                }
+                else
+                {
+                    return "Please specify the task ID. Example: 'Delete task 1'";
+                }
+            }
+
+            return null;
         }
 
         private string GetKeywordResponse(string input)

@@ -4,56 +4,81 @@ namespace CybersecurityBot
 {
     class Response
     {
+        private RandomResponses randomResponses = new RandomResponses();
+        public string lastTopic = "";
+
         public string GetResponse(string input)
         {
-            if (input.ToLower().Contains("how are you"))
+            string lower = input.ToLower();
+
+            // PHISHING
+            if (lower.Contains("phishing"))
             {
-                return "I'm functioning smoothly, ready to help stay safe online! How can I help you?";
+                lastTopic = "phishing";
+                return randomResponses.GetRandomPhishingTip();
             }
-            else if (input.ToLower().Contains("purpose") || input.ToLower().Contains("what can you do for me?"))
+
+            // PASSWORD
+            if (lower.Contains("password"))
             {
-                return "I'm here to educate you about cybersecurity threats like phishing, passwords, and unsafe browsing.";
+                lastTopic = "password";
+                return randomResponses.GetRandomPasswordTip();
             }
-            else if (input.ToLower().Contains("what can i ask?"))
+
+            // SCAM
+            if (lower.Contains("scam"))
             {
-                return "You can ask me about: phishing, password safety, safe browsing, and malware.";
+                lastTopic = "scam";
+                return randomResponses.GetRandomScamTip();
             }
-            else if (input.ToLower().Contains("phishing"))
+
+            // PRIVACY
+            if (lower.Contains("privacy"))
             {
-                return "Phishing is when attackers send fake emails/SMSs pretending to be from legitimate entities to steal personal data. Always check the emails/SMSs carefully and never click suspicious links.";
+                lastTopic = "privacy";
+                return randomResponses.GetRandomPrivacyTip();
             }
-            else if (input.ToLower().Contains("password"))
+
+            // MALWARE
+            if (lower.Contains("malware") || lower.Contains("virus"))
             {
-                return "Use passwords at least 12 characters long with uppercase, lowercase, numbers and symbols. Never reuse passwords!";
+                lastTopic = "malware";
+                return "Malware is malicious software. Keep your antivirus updated!";
             }
-            else if (input.ToLower().Contains("browsing") || input.ToLower().Contains("safe browsing"))
+
+            // BROWSING
+            if (lower.Contains("browsing") || lower.Contains("safe browsing"))
             {
-                return "Always look for HTTPS in the URL before entering personal information. Avoid clicking pop-ups and never download software from unknown websites.";
+                lastTopic = "browsing";
+                return "Look for HTTPS in URLs. Avoid suspicious downloads.";
             }
-            else if (input.ToLower().Contains("malware"))
+
+            // GREETINGS
+            if (lower.Contains("hello") || lower.Contains("hi") || lower.Contains("hey"))
             {
-                return "Malware is malicious software designed to damage your device. Keep your antivirus updated and never open attachments from unknown senders.";
+                return "Hello! How can I help you with cybersecurity today?";
             }
-            else if (input.ToLower().Contains("social engineering"))
+
+            // HOW ARE YOU
+            if (lower.Contains("how are you"))
             {
-                return "Social engineering tricks people into giving away sensitive information. Be cautious of anyone urgently asking for personal details — even if they seem official.";
+                return "I'm doing great! Ready to help you stay safe online!";
             }
-            else if (input.ToLower().Contains("hello") || input.ToLower().Contains("hi"))
+
+            // THANK YOU
+            if (lower.Contains("thank"))
             {
-                return "Hello! Great to chat with you. Ask me anything about cybersecurity!";
+                return "You're welcome! Stay safe online!";
             }
-            else if (input.ToLower().Contains("bye") || input.ToLower().Contains("exit") || input.ToLower().Contains("quit"))
+
+            // EXIT
+            if (lower.Contains("bye") || lower.Contains("exit") || lower.Contains("quit"))
             {
                 return "EXIT";
             }
-            else if (string.IsNullOrWhiteSpace(input))
-            {
-                return "It looks like you didn't type anything. Please ask me a cybersecurity question!";
-            }
-            else
-            {
-                return "I didn't quite understand that. Could you rephrase?";
-            }
+
+            // DEFAULT
+            return "I can help with cybersecurity topics like phishing, passwords, scams, and privacy. Type 'help' to see all commands!";
         }
     }
 }
