@@ -23,20 +23,42 @@ upgraded it into a full WinForms GUI application.
 ## Part 2 Features
 - WinForms GUI window
 - Random responses using Lists for each topic
-- Sentiment detection — detects worried, frustrated, curious, confused
-- Memory — remembers last topic for follow up questions
+- Sentiment detection â€” detects worried, frustrated, curious, confused
+- Memory â€” remembers last topic for follow up questions
 - Type 'tell me more' or 'another tip' for follow up responses
 - Input validation with error messages
 - Coloured chat display
 
+## Part 3 Advanced Features 
+-  Task Assistant with reminders
+-  Cybersecurity Quiz with 15+ questions
+-  NLP simulation with keyword detection
+-  Activity Log Feature
+-  Database integration (file-based storage)
+
 ## Project Structure
-- `Program.cs` — entry point, launches the WinForms window
-- `MainForm.cs` — the GUI window and conversation logic
-- `ChatBot.cs` — original console chatbot logic from Part 1
-- `ConsoleUI.cs` — console display methods from Part 1
-- `Response.cs` — all chatbot responses and keyword matching
-- `SentimentDetector.cs` — detects user emotions from input
-- `RandomResponses.cs` — stores multiple tips per topic using Lists
+- `Program.cs` â€” entry point, launches the WinForms window
+- `MainForm.cs` â€” the GUI window and conversation logic
+- `ChatBot.cs` â€” original console chatbot logic from Part 1
+- `ConsoleUI.cs` â€” console display methods from Part 1
+- `Response.cs` â€” all chatbot responses and keyword matching
+- `SentimentDetector.cs` â€” detects user emotions from input
+- `RandomResponses.cs` â€” stores multiple tips per topic using Lists
+
+## Technologies Used 
+- C# .NET 8.0
+- Windows Forms
+- File-based storage (JSON/TXT)
+- No external dependencies
+
+## Author
+
+[Jimlongwe]
+
+## License
+
+This project is for educational purposes.
+
 
 ## CI Workflow
 ![CI Status](https://github.com/Jimmy172-oos/CybersecurityBot/actions/workflows/dotnet.yml/badge.svg)
